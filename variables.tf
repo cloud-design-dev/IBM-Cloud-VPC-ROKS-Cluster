@@ -9,11 +9,11 @@ variable "region" {
   default     = ""
 }
 
-# variable "ssh_key" {
-#   type        = string
-#   description = "(Optional) The name of an existing SSH Key that will be added to the w instances in the region. If none provided a key will be created and added to the instance"
-#   default     = ""
-# }
+variable "ssh_key" {
+   type        = string
+   description = "(Optional) The name of an existing SSH Key that will be added to the w instances in the region. If none provided a key will be created and added to the instance"
+   default     = ""
+}
 
 variable "resource_group" {
   type        = string

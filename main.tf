@@ -154,7 +154,7 @@ module "instance" {
   subnet_id         = module.subnet[0].id
   ssh_keys          = [data.ibm_is_ssh_key.regional_ssh_key.id]
   resource_group    = local.resource_group
-  name              = "$var.name}-wg"
+  name              = "${var.name}-wg"
   zone              = data.ibm_is_zones.mzr.zones[0]
   security_group_id = ibm_is_security_group.wireguard.id
   tags              = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
@@ -162,6 +162,6 @@ module "instance" {
 }
 
 resource "ibm_is_floating_ip" "wg_vpn" {
-  name   = "$var.name}-public-ip"
+  name   = "${var.name}-public-ip"
   target = module.instance.primary_network_interface_id
 }
