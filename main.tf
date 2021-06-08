@@ -86,3 +86,72 @@ module "monitoring" {
   cluster_id     = ibm_container_vpc_cluster.roks.id
   tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
 }
+
+resource "ibm_is_security_group" "wireguard" {
+  name           = "wg-security-group"
+  vpc            = module.vpc.id
+  resource_group = local.resource_group
+}
+
+resource "ibm_is_security_group_rule" "wg_udp" {
+  group     = ibm_is_security_group.wireguard.id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+  udp {
+    port_min = 51280
+    port_max = 51280
+  }
+}
+
+resource "ibm_is_security_group_rule" "wg_ssh" {
+  group     = ibm_is_security_group.wireguard.id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+  tcp {
+    port_min = 22
+    port_max = 22
+  }
+}
+
+resource "ibm_is_security_group_rule" "wg_http" {
+  group     = ibm_is_security_group.wireguard.id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+  tcp {
+    port_min = 80
+    port_max = 80
+  }
+}
+
+resource "ibm_is_security_group_rule" "wg_https" {
+  group     = ibm_is_security_group.wireguard.id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+  tcp {
+    port_min = 443
+    port_max = 443
+  }
+}
+
+resource "ibm_is_security_group_rule" "wg_all_out" {
+  group     = ibm_is_security_group.wireguard.id
+  direction = "outbound"
+}
+
+module "instance" {
+  source            = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Instance-Module.git"
+  vpc_id            = module.vpc.id
+  subnet_id         = module.subnet[0].id
+  ssh_keys          = [data.ibm_is_ssh_key.regional_ssh_key.id]
+  resource_group    = local.resource_group
+  name              = "$var.name}-wg"
+  zone              = data.ibm_is_zones.mzr.zones[0]
+  security_group_id = ibm_is_security_group.wireguard.id
+  tags              = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
+  user_data         = file("${path.module}/install.yml")
+}
+
+resource "ibm_is_floating_ip" "wg_vpn" {
+  name   = "$var.name}-public-ip"
+  target = module.instance.primary_network_interface_id
+}
