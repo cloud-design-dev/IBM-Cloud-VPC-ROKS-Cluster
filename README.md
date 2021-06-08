@@ -2,9 +2,9 @@
 This repository will deploy the following:
 
  - An IBM Cloud [VPC](https://www.ibm.com/cloud/learn/vpc) 
- - Per zone [Public Gateways](https://cloud.ibm.com/docs/vpc?topic=vpc-about-networking-for-vpc#public-gateway-for-external-connectivity) for outbound connectivity.
- - Per zone [Subnet](https://cloud.ibm.com/docs/vpc?topic=vpc-about-networking-for-vpc#subnets-in-the-vpc) for the OpenShift worker nodes.
- - [Red Hat OpenShift (ROKS)](https://www.ibm.com/cloud/openshift) cluster. 
+ - A single zone [Public Gateways](https://cloud.ibm.com/docs/vpc?topic=vpc-about-networking-for-vpc#public-gateway-for-external-connectivity) for outbound connectivity.
+ - A single zone [Subnet](https://cloud.ibm.com/docs/vpc?topic=vpc-about-networking-for-vpc#subnets-in-the-vpc) for the OpenShift worker nodes.
+ - A single zone [Red Hat OpenShift (ROKS)](https://www.ibm.com/cloud/openshift) cluster. 
  - (Optional) A [LogDNA](https://cloud.ibm.com/docs/openshift?topic=openshift-health#openshift_logging) logging instance for the cluster.
  - (Optional) A [Sysdig](https://cloud.ibm.com/docs/openshift?topic=openshift-health-monitor) monitoring instance for the cluster. 
 
