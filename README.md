@@ -38,7 +38,7 @@ This repository will deploy the following:
 | name | Name that will be prepended to all resources. | `string` | n/a | yes |
 | region | Name of the IBM Cloud region where resources will be deployed. Run `ibmcloud is regions` to see available options. | `string` | n/a | yes |
 | owner | Identifier for the user that created the VPC and cluster. | `string` | n/a | yes |
-| resource_group | The name of an existing Resource group to use. If none provided, a new one named `\`var.name\`-resource-group` will be created. | `string` | n/a | no |
+| resource_group | The name of an existing Resource group to use. If none provided, a new one named `var.name-resource-group` will be created. | `string` | n/a | no |
 
 
 ## Outputs
