@@ -8,8 +8,9 @@ This repository will deploy the following:
  - (Optional) A [LogDNA](https://cloud.ibm.com/docs/openshift?topic=openshift-health#openshift_logging) logging instance for the cluster.
  - (Optional) A [Sysdig](https://cloud.ibm.com/docs/openshift?topic=openshift-health-monitor) monitoring instance for the cluster. 
 
-## Deploy all resources
+## Deploy Resources
 
+### Using local Terraform
 1. Copy `terraform.tfvars.example` to `terraform.tfvars`:
 
    ```sh
@@ -30,6 +31,9 @@ This repository will deploy the following:
    terraform apply default.tfplan
    ```
    
+### Using IBM Cloud Schematics
+[Schematics](https://cloud.ibm.com/docs/schematics?topic=schematics-about-schematics) workspaces deliver Terraform-as-a-Service capabilities to you so that you can automate the provisioning and management of your IBM Cloud resources, and rapidly build, duplicate, and scale complex, multi-tier cloud environments. 
+
 [![Deploy using Schematics](https://cloud.ibm.com/devops/setup/deploy/button_x2.png)](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/cloud-design-dev/IBM-Cloud-VPC-ROKS-Cluster.git&terraform_version=terraform_v0.14)
    
 ## Inputs
