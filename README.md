@@ -1,12 +1,12 @@
-# IBM-Cloud-VPC-ROKS-Cluster
+# IBM Cloud VPC ROKS Cluster
 This repository will deploy the following:
 
- - An IBM Cloud [VPC]() 
- - Per zone [Public Gateways]() for outbound connectivity.
- - Per zone [Subnet]() for the OpenShift worker nodes.
+ - An IBM Cloud [VPC](https://www.ibm.com/cloud/learn/vpc) 
+ - Per zone [Public Gateways](https://cloud.ibm.com/docs/vpc?topic=vpc-about-networking-for-vpc#public-gateway-for-external-connectivity) for outbound connectivity.
+ - Per zone [Subnet](https://cloud.ibm.com/docs/vpc?topic=vpc-about-networking-for-vpc#subnets-in-the-vpc) for the OpenShift worker nodes.
  - [Red Hat OpenShift (ROKS)](https://www.ibm.com/cloud/openshift) cluster. 
- - (Optional) A [LogDNA]() logging instance for the cluster.
- - (Optional) A [Sysdig]() monitoring instance for the cluster. 
+ - (Optional) A [LogDNA](https://cloud.ibm.com/docs/openshift?topic=openshift-health#openshift_logging) logging instance for the cluster.
+ - (Optional) A [Sysdig](https://cloud.ibm.com/docs/openshift?topic=openshift-health-monitor) monitoring instance for the cluster. 
 
 ## Deploy all resources
 
@@ -39,7 +39,6 @@ This repository will deploy the following:
 | region | Name of the IBM Cloud region where resources will be deployed. Run `ibmcloud is regions` to see available options. | `string` | n/a | yes |
 | owner | Identifier for the user that created the VPC and cluster. | `string` | n/a | yes |
 | resource_group | The name of an existing Resource group to use. If none provided, a new one named `\`var.name\`-resource-group` will be created. | `string` | n/a | no |
-
 
 
 ## Outputs
