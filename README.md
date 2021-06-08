@@ -30,6 +30,8 @@ This repository will deploy the following:
    terraform apply default.tfplan
    ```
    
+[![Deploy using Schematics](https://cloud.ibm.com/devops/setup/deploy/button_x2.png)](https://cloud.ibm.com/schematics/workspaces/create?repository=https://github.com/cloud-design-dev/IBM-Cloud-VPC-ROKS-Cluster.git&terraform_version=terraform_v0.14)
+   
 ## Inputs
 
 | Name | Description | Type | Default | Required |
