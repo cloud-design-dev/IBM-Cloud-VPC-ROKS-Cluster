@@ -39,8 +39,8 @@ This repository will deploy the following:
 | region | Name of the IBM Cloud region where resources will be deployed. Run `ibmcloud is regions` to see available options. | `string` | n/a | yes |
 | owner | Identifier for the user that created the VPC and cluster. | `string` | n/a | yes |
 | resource_group | The name of an existing Resource group to use. If none provided, a new one named `var.name-resource-group` will be created. | `string` | n/a | no | 
-| enable\_logging | | Wether or not to deploy an IBM Cloud Logging instance with the cluster. | `bool` | `false` | no |
-| enable\_monitoring | | Wether or not to deploy an IBM Cloud Monitoring instance with the cluster. | `bool` | `false` | no |
+| enable\_logging | Wether or not to deploy an IBM Cloud Logging instance with the cluster. | `bool` | `false` | no |
+| enable\_monitoring | Wether or not to deploy an IBM Cloud Monitoring instance with the cluster. | `bool` | `false` | no |
 
 ## Outputs
 
