@@ -9,3 +9,9 @@ region = ""
 
 # Name to prepend to all resources
 name = ""
+
+# Wether or not to deploy an IBM Cloud Logging instance with the cluster.
+enable_logging = false  
+
+# Wether or not to deploy an IBM Cloud Monitoring instance with the cluster.
+enable_monitoring = false 
