@@ -47,3 +47,14 @@ variable "worker_flavor" {
   type        = string
   description = "(Optional) The instance size to use for worker nodes. If none provided it will default to `bx2.4x16` which is the minimum instance size for ROKS."
 }
+
+variable "enable_logging" {
+  type        = bool
+  description = "(Optional) Wether or not to create a LogDNA instance for cluster logs."
+}
+
+variable "enable_monitoring" {
+  type        = bool
+  description = "(Optional) Wether or not to create a Sysdig instance for cluster metrics."
+  default     = false
+}

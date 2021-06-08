@@ -48,14 +48,15 @@ resource "ibm_resource_instance" "cos_instance" {
 }
 
 resource "ibm_container_vpc_cluster" "roks" {
-  name              = "${var.name}-roks-cluster"
-  vpc_id            = module.vpc.id
-  kube_version      = var.roks_version
-  flavor            = local.worker_flavor
-  worker_count      = "3"
-  cos_instance_crn  = ibm_resource_instance.cos_instance.id
-  resource_group_id = local.resource_group
-  wait_till         = "OneWorkerNodeReady"
+  name                            = "${var.name}-roks-cluster"
+  vpc_id                          = module.vpc.id
+  kube_version                    = var.roks_version
+  flavor                          = local.worker_flavor
+  worker_count                    = "3"
+  cos_instance_crn                = ibm_resource_instance.cos_instance.id
+  disable_public_service_endpoint = true
+  resource_group_id               = local.resource_group
+  wait_till                       = "OneWorkerNodeReady"
   zones {
     subnet_id = module.subnet[0].id
     name      = "${var.region}-1"
@@ -76,42 +77,22 @@ resource "ibm_container_vpc_cluster" "roks" {
   }
 }
 
-resource "ibm_resource_instance" "logdna" {
-  name              = "${var.name}-logdna"
-  resource_group_id = local.resource_group
-  service           = "logdna"
-  plan              = "7-day"
-  location          = var.region
+module "logging" {
+  count          = var.enable_logging == true ? 0 : 1
+  source         = "./logging"
+  name           = var.name
+  region         = var.region
+  resource_group = local.resource_group
+  cluster_id     = ibm_container_vpc_cluster.roks.id
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
 }
 
-resource "ibm_resource_key" "logdna_resourceKey" {
-  name                 = "${var.name}-logdna-key"
-  resource_instance_id = ibm_resource_instance.logdna.id
-  role                 = "Manager"
-}
-
-resource "ibm_ob_logging" "roks" {
-  depends_on  = [ibm_resource_key.logdna_resourceKey]
-  cluster     = ibm_container_vpc_cluster.roks.id
-  instance_id = ibm_resource_instance.logdna.guid
-}
-
-resource "ibm_resource_instance" "sysdig" {
-  name              = "${var.name}-sysdig"
-  resource_group_id = local.resource_group
-  service           = "sysdig-monitor"
-  plan              = "graduated-tier"
-  location          = "us-south"
-}
-
-resource "ibm_resource_key" "sysdig_resourceKey" {
-  name                 = "${var.name}-key"
-  resource_instance_id = ibm_resource_instance.sysdig.id
-  role                 = "Manager"
-}
-
-resource "ibm_ob_monitoring" "test2" {
-  depends_on  = [ibm_resource_key.sysdig_resourceKey]
-  cluster     = ibm_container_vpc_cluster.roks.id
-  instance_id = ibm_resource_instance.sysdig.guid
+module "monitoring" {
+  count          = var.enable_monitoring == true ? 0 : 1
+  source         = "./monitoring"
+  name           = var.name
+  region         = var.region
+  resource_group = local.resource_group
+  cluster_id     = ibm_container_vpc_cluster.roks.id
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
 }
