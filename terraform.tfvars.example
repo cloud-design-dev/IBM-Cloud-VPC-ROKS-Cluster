@@ -9,3 +9,13 @@ region = ""
 
 # Name to prepend to all resources
 name = ""
+
+# Name of an existing SSH key
+ssh_key = ""
+
+# Wether or not to also create a monitoring (sysdig) instance 
+enable_monitoring = false
+
+# Wether or not to also create a logging (logdna) instance
+enable_logging = false
+
