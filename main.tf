@@ -17,25 +17,23 @@ module "vpc" {
 }
 
 module "public_gateway" {
-  count          = length(data.ibm_is_zones.mzr.zones)
   source         = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Public-Gateway-Module.git"
-  name           = "${var.name}-${data.ibm_is_zones.mzr.zones[count.index]}-pubgw"
-  zone           = data.ibm_is_zones.mzr.zones[count.index]
+  name           = "${var.name}-${data.ibm_is_zones.mzr.zones[0]}-pubgw"
+  zone           = data.ibm_is_zones.mzr.zones[0]
   vpc            = module.vpc.id
   resource_group = local.resource_group
-  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}", "vpc:${var.name}-vpc", "zone:${data.ibm_is_zones.mzr.zones[count.index]}"])
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}", "vpc:${var.name}-vpc", "zone:${data.ibm_is_zones.mzr.zones[0]}"])
 }
 
 module "subnet" {
-  count          = length(data.ibm_is_zones.mzr.zones)
   source         = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Subnet-Module.git"
-  name           = "${var.name}-${data.ibm_is_zones.mzr.zones[count.index]}-subnet"
+  name           = "${var.name}-${data.ibm_is_zones.mzr.zones[0]}-subnet"
   resource_group = local.resource_group
   address_count  = "32"
   vpc            = module.vpc.id
-  zone           = data.ibm_is_zones.mzr.zones[count.index]
-  public_gateway = module.public_gateway[count.index].id
-  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}", "vpc:${var.name}-vpc", "zone:${data.ibm_is_zones.mzr.zones[count.index]}"])
+  zone           = data.ibm_is_zones.mzr.zones[0]
+  public_gateway = module.public_gateway.id
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}", "vpc:${var.name}-vpc", "zone:${data.ibm_is_zones.mzr.zones[0]}"])
 }
 
 resource "ibm_resource_instance" "cos_instance" {
@@ -58,16 +56,8 @@ resource "ibm_container_vpc_cluster" "roks" {
   resource_group_id               = local.resource_group
   wait_till                       = "OneWorkerNodeReady"
   zones {
-    subnet_id = module.subnet[0].id
-    name      = "${var.region}-1"
-  }
-  zones {
-    subnet_id = module.subnet[1].id
-    name      = "${var.region}-2"
-  }
-  zones {
-    subnet_id = module.subnet[2].id
-    name      = "${var.region}-3"
+    subnet_id = module.subnet.id
+    name      = data.ibm_is_zones.mzr.zones[0]
   }
   tags = concat(var.tags, ["project:${var.name}", "region:${var.region}", "vpc:${var.name}-vpc", "owner:${var.owner}"])
 
