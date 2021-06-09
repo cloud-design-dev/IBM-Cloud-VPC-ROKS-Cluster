@@ -52,7 +52,7 @@ resource "ibm_container_vpc_cluster" "roks" {
   flavor                          = local.worker_flavor
   worker_count                    = "3"
   cos_instance_crn                = ibm_resource_instance.cos_instance.id
-  disable_public_service_endpoint = true
+  disable_public_service_endpoint = var.private_endpoint_only
   resource_group_id               = local.resource_group
   wait_till                       = "OneWorkerNodeReady"
   zones {
