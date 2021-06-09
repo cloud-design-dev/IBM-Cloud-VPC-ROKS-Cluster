@@ -59,7 +59,7 @@ variable "enable_monitoring" {
   default     = false
 }
 
-variable "private_endpoint_only"
+variable "private_endpoint_only" {
 type = bool
 description = "Wether or not to disable the public endpoint"
 default = false
