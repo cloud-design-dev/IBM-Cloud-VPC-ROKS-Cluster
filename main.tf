@@ -146,7 +146,7 @@ module "instance" {
   resource_group    = local.resource_group
   name              = "${var.name}-wg"
   zone              = data.ibm_is_zones.mzr.zones[0]
-  security_group_id = ibm_is_security_group.wireguard.id
+  security_groups   = ibm_is_security_group.wireguard.id
   tags              = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
   user_data         = file("${path.module}/install.yml")
 }
