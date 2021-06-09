@@ -58,3 +58,9 @@ variable "enable_monitoring" {
   description = "(Optional) Wether or not to create a Sysdig instance for cluster metrics."
   default     = false
 }
+
+variable "private_endpoint_only"
+type = bool
+description = "Wether or not to disable the public endpoint"
+default = false
+}
