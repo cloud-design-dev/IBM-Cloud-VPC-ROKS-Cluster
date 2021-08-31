@@ -49,7 +49,7 @@ resource "ibm_container_vpc_cluster" "roks" {
   worker_count                    = "3"
   cos_instance_crn                = ibm_resource_instance.cos_instance.id
   disable_public_service_endpoint = var.private_endpoint_only
-  resource_group                  = data.ibm_resource_group.group.id
+  resource_group_id               = data.ibm_resource_group.group.id
   wait_till                       = "OneWorkerNodeReady"
   zones {
     subnet_id = module.subnet[0].id
