@@ -27,7 +27,7 @@ module "subnet" {
   address_count  = "32"
   vpc            = module.vpc.id
   zone           = data.ibm_is_zones.mzr.zones[count.index]
-  public_gateway = data.ibm_resource_group.group.id
+  public_gateway = module.public_gateway[count.index].id
   tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "zone:${data.ibm_is_zones.mzr.zones[count.index]}"])
 }
 
