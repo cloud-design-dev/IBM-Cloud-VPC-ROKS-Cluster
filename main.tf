@@ -1,48 +1,43 @@
-resource "ibm_resource_group" "group" {
-  count = var.resource_group != "" ? 0 : 1
-  name  = "${var.name}-group"
-  tags  = concat(var.tags, ["project:${var.name}", "region:${var.region}"])
-}
-
 locals {
-  resource_group = var.resource_group != "" ? data.ibm_resource_group.group.0.id : ibm_resource_group.group.0.id
-  worker_flavor  = var.worker_flavor != "" ? var.worker_flavor : "bx2.4x16"
+  worker_flavor = var.worker_flavor != "" ? var.worker_flavor : "bx2.4x16"
 }
 
 module "vpc" {
   source         = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Module.git"
   name           = "${var.name}-vpc"
-  resource_group = local.resource_group
-  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}", "vpc:${var.name}-vpc"])
+  resource_group = data.ibm_resource_group.group.id
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}"])
 }
 
 module "public_gateway" {
+  count          = length(data.ibm_is_zones.mzr.zones)
   source         = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Public-Gateway-Module.git"
-  name           = "${var.name}-${data.ibm_is_zones.mzr.zones[0]}-pubgw"
-  zone           = data.ibm_is_zones.mzr.zones[0]
+  name           = "${var.name}-${data.ibm_is_zones.mzr.zones[count.index]}-pubgw"
+  zone           = data.ibm_is_zones.mzr.zones[count.index]
   vpc            = module.vpc.id
-  resource_group = local.resource_group
-  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}", "vpc:${var.name}-vpc", "zone:${data.ibm_is_zones.mzr.zones[0]}"])
+  resource_group = data.ibm_resource_group.group.id
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "zone:${data.ibm_is_zones.mzr.zones[count.index]}"])
 }
 
 module "subnet" {
   source         = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Subnet-Module.git"
-  name           = "${var.name}-${data.ibm_is_zones.mzr.zones[0]}-subnet"
-  resource_group = local.resource_group
+  name           = "${var.name}-${data.ibm_is_zones.mzr.zones[count.index]}-subnet"
+  resource_group = data.ibm_resource_group.group.id
   address_count  = "32"
   vpc            = module.vpc.id
-  zone           = data.ibm_is_zones.mzr.zones[0]
-  public_gateway = module.public_gateway.id
-  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}", "vpc:${var.name}-vpc", "zone:${data.ibm_is_zones.mzr.zones[0]}"])
+  zone           = data.ibm_is_zones.mzr.zones[count.index]
+  public_gateway = data.ibm_resource_group.group.id
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "zone:${data.ibm_is_zones.mzr.zones[count.index]}"])
 }
 
 resource "ibm_resource_instance" "cos_instance" {
-  depends_on = [module.subnet]
-  name       = "${var.name}-cos-instance"
-  service    = "cloud-object-storage"
-  plan       = "standard"
-  location   = "global"
-  tags       = concat(var.tags, ["project:${var.name}", "owner:${var.owner}", "vpc:${var.name}-vpc"])
+  depends_on        = [module.subnet]
+  name              = "${var.name}-cos-instance"
+  resource_group_id = data.ibm_resource_group.group.id
+  service           = "cloud-object-storage"
+  plan              = "standard"
+  location          = "global"
+  tags              = concat(var.tags, ["project:${var.name}"])
 }
 
 resource "ibm_container_vpc_cluster" "roks" {
@@ -53,13 +48,22 @@ resource "ibm_container_vpc_cluster" "roks" {
   worker_count                    = "3"
   cos_instance_crn                = ibm_resource_instance.cos_instance.id
   disable_public_service_endpoint = var.private_endpoint_only
-  resource_group_id               = local.resource_group
+  resource_group                  = data.ibm_resource_group.group.id
   wait_till                       = "OneWorkerNodeReady"
   zones {
-    subnet_id = module.subnet.id
+    subnet_id = module.subnet[0].id
     name      = data.ibm_is_zones.mzr.zones[0]
   }
-  tags = concat(var.tags, ["project:${var.name}", "region:${var.region}", "vpc:${var.name}-vpc", "owner:${var.owner}"])
+  zones {
+    subnet_id = module.subnet[1].id
+    name      = data.ibm_is_zones.mzr.zones[1]
+  }
+
+  zones {
+    subnet_id = module.subnet[2].id
+    name      = data.ibm_is_zones.mzr.zones[2]
+  }
+  tags = concat(var.tags, ["project:${var.name}", "region:${var.region}"])
 
   timeouts {
     create = "60m"
@@ -72,7 +76,7 @@ module "logging" {
   source         = "./logging"
   name           = var.name
   region         = var.region
-  resource_group = local.resource_group
+  resource_group = data.ibm_resource_group.group.id
   cluster_id     = ibm_container_vpc_cluster.roks.id
   tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
 }
@@ -82,76 +86,33 @@ module "monitoring" {
   source         = "./monitoring"
   name           = var.name
   region         = var.region
-  resource_group = local.resource_group
+  resource_group = data.ibm_resource_group.group.id
   cluster_id     = ibm_container_vpc_cluster.roks.id
   tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
 }
 
-resource "ibm_is_security_group" "wireguard" {
-  name           = "wg-security-group"
-  vpc            = module.vpc.id
-  resource_group = local.resource_group
-}
 
-resource "ibm_is_security_group_rule" "wg_udp" {
-  group     = ibm_is_security_group.wireguard.id
-  direction = "inbound"
-  remote    = "0.0.0.0/0"
-  udp {
-    port_min = 51280
-    port_max = 51280
-  }
-}
+# module "security" {
+#   source = "./security"
+#   name = var.name
 
-resource "ibm_is_security_group_rule" "wg_ssh" {
-  group     = ibm_is_security_group.wireguard.id
-  direction = "inbound"
-  remote    = "0.0.0.0/0"
-  tcp {
-    port_min = 22
-    port_max = 22
-  }
-}
+# }
 
-resource "ibm_is_security_group_rule" "wg_http" {
-  group     = ibm_is_security_group.wireguard.id
-  direction = "inbound"
-  remote    = "0.0.0.0/0"
-  tcp {
-    port_min = 80
-    port_max = 80
-  }
-}
+# module "openvpn" {
+#   source            = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Instance-Module.git"
+#   vpc_id            = module.vpc.id
+#   subnet_id         = module.subnet.id
+#   ssh_keys          = [data.ibm_is_ssh_key.regional_ssh_key.id]
+#   resource_group    = local.resource_group
+#   name              = "${var.name}-vpn"
+#   zone              = data.ibm_is_zones.mzr.zones[0]
+#   security_groups   = ibm_is_security_group.wireguard.id
+#   tags              = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
+#   user_data         = file("${path.module}/install.yml")
+# }
 
-resource "ibm_is_security_group_rule" "wg_https" {
-  group     = ibm_is_security_group.wireguard.id
-  direction = "inbound"
-  remote    = "0.0.0.0/0"
-  tcp {
-    port_min = 443
-    port_max = 443
-  }
-}
+# resource "ibm_is_floating_ip" "wg_vpn" {
+#   name   = "${var.name}-public-ip"
+#   target = module.instance.primary_network_interface_id
+# }
 
-resource "ibm_is_security_group_rule" "wg_all_out" {
-  group     = ibm_is_security_group.wireguard.id
-  direction = "outbound"
-}
-
-module "instance" {
-  source            = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Instance-Module.git"
-  vpc_id            = module.vpc.id
-  subnet_id         = module.subnet.id
-  ssh_keys          = [data.ibm_is_ssh_key.regional_ssh_key.id]
-  resource_group    = local.resource_group
-  name              = "${var.name}-wg"
-  zone              = data.ibm_is_zones.mzr.zones[0]
-  security_groups   = ibm_is_security_group.wireguard.id
-  tags              = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
-  user_data         = file("${path.module}/install.yml")
-}
-
-resource "ibm_is_floating_ip" "wg_vpn" {
-  name   = "${var.name}-public-ip"
-  target = module.instance.primary_network_interface_id
-}

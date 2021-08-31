@@ -9,11 +9,11 @@ variable "region" {
   default     = ""
 }
 
-variable "ssh_key" {
-  type        = string
-  description = "(Optional) The name of an existing SSH Key that will be added to the w instances in the region. If none provided a key will be created and added to the instance"
-  default     = ""
-}
+# variable "ssh_key" {
+#   type        = string
+#   description = "(Optional) The name of an existing SSH Key that will be added to the w instances in the region. If none provided a key will be created and added to the instance"
+#   default     = ""
+# }
 
 variable "resource_group" {
   type        = string
@@ -35,13 +35,13 @@ variable "tags" {
 variable "roks_version" {
   type        = string
   description = "Version of OpenShift to use for VPC cluster. To see available options run the command `ibmcloud oc versions`."
-  default     = "4.6.28_openshift"
+  default     = "4.7.23_openshift"
 }
 
-variable "owner" {
-  type        = string
-  description = "Identifier for the user that created the VPC and cluster. Example would be `ryantiffany`. This will then get added as the tag `owner:ryantiffany`."
-}
+# variable "owner" {
+#   type        = string
+#   description = "Identifier for the user that created the VPC and cluster. Example would be `ryantiffany`. This will then get added as the tag `owner:ryantiffany`."
+# }
 
 variable "worker_flavor" {
   type        = string
@@ -51,16 +51,17 @@ variable "worker_flavor" {
 variable "enable_logging" {
   type        = bool
   description = "(Optional) Wether or not to create a LogDNA instance for cluster logs."
+  default     = true
 }
 
 variable "enable_monitoring" {
   type        = bool
   description = "(Optional) Wether or not to create a Sysdig instance for cluster metrics."
-  default     = false
+  default     = true
 }
 
 variable "private_endpoint_only" {
-type = bool
-description = "Wether or not to disable the public endpoint"
-default = false
+  type        = bool
+  description = "Wether or not to disable the public endpoint"
+  default     = false
 }
