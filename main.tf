@@ -20,6 +20,7 @@ module "public_gateway" {
 }
 
 module "subnet" {
+  count          = length(data.ibm_is_zones.mzr.zones)
   source         = "git::https://github.com/cloud-design-dev/IBM-Cloud-VPC-Subnet-Module.git"
   name           = "${var.name}-${data.ibm_is_zones.mzr.zones[count.index]}-subnet"
   resource_group = data.ibm_resource_group.group.id
@@ -78,7 +79,7 @@ module "logging" {
   region         = var.region
   resource_group = data.ibm_resource_group.group.id
   cluster_id     = ibm_container_vpc_cluster.roks.id
-  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}"])
 }
 
 module "monitoring" {
@@ -88,7 +89,7 @@ module "monitoring" {
   region         = var.region
   resource_group = data.ibm_resource_group.group.id
   cluster_id     = ibm_container_vpc_cluster.roks.id
-  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}", "owner:${var.owner}"])
+  tags           = concat(var.tags, ["project:${var.name}", "region:${var.region}"])
 }
 
 
